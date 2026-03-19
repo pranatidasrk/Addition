@@ -11,14 +11,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t addition:v1 .'
+                bat 'docker build -t addition:v1 .'
             }
        
         }
 
         stage('Run Container') {
             steps {
-                sh '''
+                bat '''
                 docker run -itd -p 8081:5000 addition:v1
                 '''
             }
