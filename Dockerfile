@@ -1,22 +1,30 @@
-FROM python:3.9-alpine
+# ---------- Stage 1: Build dependencies ----------
+FROM python:3.9-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies (often needed for pip packages)
+# Install build dependencies
 RUN apk add --no-cache gcc musl-dev libffi-dev
 
-# Copy requirements first (better layer caching)
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies into a folder
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+
+# ---------- Stage 2: Final image ----------
+FROM python:3.9-alpine
+
+WORKDIR /app
+
+# Copy installed dependencies from builder stage
+COPY --from=builder /install /usr/local
 
 # Copy application code
-COPY app.py .
+COPY ./app/app.py .
 
 # Expose port
 EXPOSE 5000
 
-# Run the application
+# Run app
 CMD ["python", "app.py"]
