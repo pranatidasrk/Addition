@@ -9,37 +9,38 @@ pipeline {
             }
         }
 
+        stage('Set Minikube Docker Env') {
+            steps {
+                bat '''
+                @echo off
+                for /f "tokens=*" %%i in ('minikube docker-env --shell cmd') do %%i
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t addition:v1 .'
             }
-       
-        }
-		
-		stage('stop container') {
-            steps { 
-			script {
-			try { 
-			
-			bat '''
-			docker stop sangu
-			docker rm sangu
-			'''
-               }
-			   catch (err)
-			   {
-			   println("stage fail but continue")
-			   }
-			   }
-			   
-            }
         }
 
-        stage('Run Container') {
+        stage('Deploy to Minikube') {
             steps {
-                bat '''
-                docker run -itd -p 8081:5000 --name sangu addition:v1
-                '''
+                script {
+                    try {
+                        bat '''
+                        kubectl delete -f flask-app.yaml
+                        '''
+                    } catch (err) {
+                        echo "Old deployment not found, continuing..."
+                    }
+
+                    bat '''
+                    kubectl apply -f flask-app.yaml
+                    kubectl get pods
+                    kubectl get svc
+                    '''
+                }
             }
         }
     }
@@ -49,7 +50,7 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
         success {
-            echo 'App deployed successfully 🚀'
+            echo 'App deployed in Minikube 🚀'
         }
         failure {
             echo 'Something went wrong ❌'
