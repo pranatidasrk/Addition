@@ -15,11 +15,21 @@ pipeline {
             }
        
         }
+		
+		stage('stop container') {
+            steps { 
+			bat '''
+			docker stop sangu
+			docker rm sangu
+			'''
+                
+            }
+        }
 
         stage('Run Container') {
             steps {
                 bat '''
-                docker run -itd -p 8081:5000 addition:v1
+                docker run -itd -p 8081:5000 --name sangu addition:v1
                 '''
             }
         }
