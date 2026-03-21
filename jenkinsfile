@@ -18,11 +18,20 @@ pipeline {
 		
 		stage('stop container') {
             steps { 
+			script {
+			try { 
+			
 			bat '''
 			docker stop sangu
 			docker rm sangu
 			'''
-                
+               }
+			   catch (err)
+			   {
+			   println("stage fail but continue")
+			   }
+			   }
+			   
             }
         }
 
