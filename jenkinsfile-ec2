@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        EC2_IP = '16.176.157.1'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -9,35 +13,28 @@ pipeline {
             }
         }
 
-        //stage('Set Minikube Docker Env') {
-            steps {
-                bat '''
-                @echo off
-                for /f "tokens=*" %%i in ('minikube docker-env --shell cmd') do %%i
-                '''
-            }
-       // }
-
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t addition:v1 .'
             }
         }
 
-        stage('Deploy to ec2 instance') {
+        stage('Deploy to EC2') {
             steps {
-                script {
-                    //withCredentials([sshUserPrivateKey(credentialsId: 'firstinstance', keyFileVariable: 'SSH_KEY', usernameVariable: 'ec2-user')]) {
-                    
-                    bat '''
-                    
-                    ssh -i /var/lib/jenkins/firstinstance.pem << EOF
-					
-					docker run -itd -p 8081:5000 pranatidasrk/addition:v3
-					docker ps
-                    EOF
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'firstinstance',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+
+                    sh '''
+                    chmod 400 $SSH_KEY
+
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_IP "
+                        docker run -itd -p 8081:5000 pranatidasrk/addition:v3 &&
+                        docker ps
+                    "
                     '''
-               // }
                 }
             }
         }
@@ -48,7 +45,7 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
         success {
-            echo 'App deployed in Minikube 🚀'
+            echo 'App deployed to EC2 🚀'
         }
         failure {
             echo 'Something went wrong ❌'
