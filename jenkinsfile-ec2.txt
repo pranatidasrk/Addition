@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/pranatidasrk/Addition.git', branch: 'main'
+            }
+        }
+
+        stage('Set Minikube Docker Env') {
+            steps {
+                bat '''
+                @echo off
+                for /f "tokens=*" %%i in ('minikube docker-env --shell cmd') do %%i
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t addition:v1 .'
+            }
+        }
+
+        stage('Deploy to ec2 instance') {
+            steps {
+                script {
+                    //withCredentials([sshUserPrivateKey(credentialsId: 'firstinstance', keyFileVariable: 'SSH_KEY', usernameVariable: 'ec2-user')]) {
+                    
+                    bat '''
+                    
+                    ssh -i C:\Users\prana\Downloads\fistinstance.pem ec2-user@16.176.157.1 << EOF
+					
+					docker run -itd -p 8081:5000 pranatidasrk/addition:v3
+					docker ps
+                    EOF
+                    '''
+               // }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'App deployed in Minikube 🚀'
+        }
+        failure {
+            echo 'Something went wrong ❌'
+        }
+    }
+}
