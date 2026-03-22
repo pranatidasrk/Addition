@@ -31,7 +31,7 @@ pipeline {
                     
                     bat '''
                     
-                    ssh -i C:\Users\prana\Downloads\fistinstance.pem ec2-user@16.176.157.1 << EOF
+                    ssh -i /var/lib/jenkins/firstinstance.pem << EOF
 					
 					docker run -itd -p 8081:5000 pranatidasrk/addition:v3
 					docker ps
