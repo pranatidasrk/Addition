@@ -1,0 +1,57 @@
+<<<<<<< HEAD
+=======
+pipeline {
+    agent any
+
+    environment {
+        EC2_IP = '16.176.157.1'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/pranatidasrk/Addition.git', branch: 'main'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t addition:v1 .'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'firstinstance',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+
+                    sh '''
+                    chmod 400 $SSH_KEY
+
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$EC2_IP "
+                        docker run -itd -p 8081:5000 pranatidasrk/addition:v3 &&
+                        docker ps
+                    "
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'App deployed to EC2 🚀'
+        }
+        failure {
+            echo 'Something went wrong ❌'
+        }
+    }
+}
+>>>>>>> 4c78f247e0758ddc7d2d5a167ee265d5f0a50145
