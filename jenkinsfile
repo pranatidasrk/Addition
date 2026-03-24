@@ -23,8 +23,24 @@ pipeline {
                 bat 'docker build -t addition:v1 .'
             }
         }
+		
+		stage('Dockerhub push ') {
+            steps {
+			steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+					docker tag pranatidasrk/addition:v4 addition:v1
+                    docker login -u $DOCKER_USER -p $DOCKER_PASS https://hub.docker.com/repositories/pranatidasrk
+					docker push pranatidasrk/addition:v4
+					docker logout
+                    '''
+                }
+            }
+       
+            }
+        }
 
-        stage('Deploy to Minikube') {
+   /*    stage('Deploy to Minikube') {
             steps {
                 script {
                     try {
@@ -42,7 +58,7 @@ pipeline {
                     '''
                 }
             }
-        }
+        } */
     }
 
     post {
