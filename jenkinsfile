@@ -59,6 +59,14 @@ pipeline {
                 }
             }
         } */
+		
+		stage('Run Container') {
+            steps {
+                bat '''
+                docker run -itd -p 8081:5000 --name sangu addition:v1
+                '''
+            }
+        }
     }
 
     post {
