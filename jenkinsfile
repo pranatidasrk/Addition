@@ -1,5 +1,10 @@
 pipeline {
     agent any
+	
+	parameters { 
+	
+	 string(name: 'IMAGE_TAG', defaultValue: 'v1', description: 'Docker Image Tag')
+	
 
     stages {
 
@@ -20,7 +25,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t addition:v1 .'
+                bat 'docker build -t addition:${IMAGE_TAG} .'
             }
 			
 			stage('stop container') {
@@ -49,9 +54,9 @@ pipeline {
 			steps {
                 withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
-					docker tag pranatidasrk/addition:v4 addition:v1
+					docker tag pranatidasrk/addition:${IMAGE_TAG} addition:${IMAGE_TAG} 
                     docker login -u pranatidasrk -p $DOCKER_TOKEN https://hub.docker.com/repositories/pranatidasrk
-					docker push pranatidasrk/addition:v4
+					docker push pranatidasrk/addition:${IMAGE_TAG}
 					docker logout
                     '''
                 }
