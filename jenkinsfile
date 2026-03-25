@@ -42,15 +42,15 @@ pipeline {
             }
         }
         }
-<<<<<<< HEAD
+
 		
 		stage('Dockerhub push ') {
             steps {
 			steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub_creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
 					docker tag pranatidasrk/addition:v4 addition:v1
-                    docker login -u $DOCKER_USER -p $DOCKER_PASS https://hub.docker.com/repositories/pranatidasrk
+                    docker login -u pranatidasrk -p $DOCKER_TOKEN https://hub.docker.com/repositories/pranatidasrk
 					docker push pranatidasrk/addition:v4
 					docker logout
                     '''
@@ -59,8 +59,6 @@ pipeline {
        
             }
         }
-=======
->>>>>>> parent of 5f3c078 (jenkins file)
 
    /*    stage('Deploy to Minikube') {
             steps {
