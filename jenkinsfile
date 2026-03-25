@@ -22,7 +22,27 @@ pipeline {
             steps {
                 bat 'docker build -t addition:v1 .'
             }
+			
+			stage('stop container') {
+            steps { 
+			script {
+			try { 
+			
+			bat '''
+			docker stop sangu
+			docker rm sangu
+			'''
+               }
+			   catch (err)
+			   {
+			   println("stage fail but continue")
+			   }
+			   }
+			   
+            }
         }
+        }
+<<<<<<< HEAD
 		
 		stage('Dockerhub push ') {
             steps {
@@ -39,6 +59,8 @@ pipeline {
        
             }
         }
+=======
+>>>>>>> parent of 5f3c078 (jenkins file)
 
    /*    stage('Deploy to Minikube') {
             steps {
@@ -63,7 +85,7 @@ pipeline {
 		stage('Run Container') {
             steps {
                 bat '''
-                docker run -itd -p 8081:5000 --name sangu addition:v1
+                docker run -itd -p 8081:5000 addition:v1
                 '''
             }
         }
