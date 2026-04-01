@@ -41,8 +41,8 @@ pipeline {
 			try { 
 			
 			bat '''
-			docker stop sangu
-			docker rm -f sangu >nul 2>&1
+			docker stop sangu >nul 2>&1
+            docker rm -f sangu >nul 2>&1
 			'''
                }
 			   catch (err)
