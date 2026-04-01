@@ -1,9 +1,11 @@
 pipeline {
     agent any
 	
-    parameters { 
-        string(name: 'IMAGE_TAG', defaultValue: 'v1', description: 'Docker Image Tag')
-    }
+	parameters { 
+	
+	 string(name: 'IMAGE_TAG', defaultValue: 'v1', description: 'Docker Image Tag')
+  }
+	
 
     stages {
 
@@ -23,40 +25,49 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {  
+            steps {
                 bat 'docker build -t addition:${IMAGE_TAG} .'
             }
-        }	
-
-        stage('stop container') {
+			}
+			
+		stage('stop container') {
             steps { 
-                script {
-                    try { 
-                        bat '''
-                        docker stop sangu
-                        docker rm sangu
-                        '''
-                    } catch (err) {
-                        println("stage fail but continue")
-                    }
-                }
+			script {
+			try { 
+			
+			bat '''
+			docker stop sangu
+			docker rm sangu
+			'''
+               }
+			   catch (err)
+			   {
+			   println("stage fail but continue")
+			   }
+			   }
+			   
             }
         }
+        
 
-        stage('Dockerhub push ') {
-            steps {
+		
+		stage('Dockerhub push ') {
+            
+			steps {
                 withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
-                    docker tag pranatidasrk/addition:${IMAGE_TAG} addition:${IMAGE_TAG} 
-                    docker login -u pranatidasrk -p %DOCKER_TOKEN% https://hub.docker.com/repositories/pranatidasrk
-                    docker push pranatidasrk/addition:${IMAGE_TAG}
-                    docker logout
+					docker tag pranatidasrk/addition:${IMAGE_TAG} addition:${IMAGE_TAG} 
+                    docker login -u pranatidasrk -p $DOCKER_TOKEN https://hub.docker.com/repositories/pranatidasrk
+					docker push pranatidasrk/addition:${IMAGE_TAG}
+					docker logout
                     '''
                 }
             }
+       
+            
         }
 
-        /* stage('Deploy to Minikube') {
+   /*    stage('Deploy to Minikube') {
             steps {
                 script {
                     try {
@@ -76,7 +87,7 @@ pipeline {
             }
         } */
 		
-        stage('Run Container') {
+		stage('Run Container') {
             steps {
                 bat '''
                 docker run -itd -p 8081:5000 addition:v1
