@@ -26,7 +26,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t addition:${IMAGE_TAG} .'
+                bat '''
+				docker build -t addition:${IMAGE_TAG} .
+				
+				'''
             }
 			}
 			
