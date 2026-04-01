@@ -41,8 +41,8 @@ pipeline {
 			try { 
 			
 			bat '''
-			docker stop sangu >nul 2>&1
-            docker rm -f sangu >nul 2>&1
+			docker stop sangu
+			docker rm sangu
 			'''
                }
 			   catch (err)
@@ -61,9 +61,9 @@ pipeline {
 			steps {
                 withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
-					docker tag pranatidasrk/addition:${IMAGE_TAG} addition:${IMAGE_TAG} 
+					docker tag pranatidasrk/addition:%IMAGE_TAG% addition:${IMAGE_TAG} 
                     docker login -u pranatidasrk -p $DOCKER_TOKEN https://hub.docker.com/repositories/pranatidasrk
-					docker push pranatidasrk/addition:${IMAGE_TAG}
+					docker push pranatidasrk/addition:%IMAGE_TAG%
 					docker logout
                     '''
                 }
