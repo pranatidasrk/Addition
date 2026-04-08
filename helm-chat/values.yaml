@@ -1,0 +1,17 @@
+replicaCount: 2
+
+image:
+  repository: pranatidasrk/addition     
+  tag: v1
+  pullPolicy: IfNotPresent
+
+service:
+  name: addition-service
+  type: NodePort
+  port: 80
+  targetPort: 5000
+  nodePort: 30007
+
+config:
+  APP_ENV: "dev"
+  APP_COLOR: "blue"
