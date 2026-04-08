@@ -15,21 +15,27 @@ pipeline {
             }
         }
 
-        stage('Set Minikube Docker Env') {
+      /*  stage('Set Minikube Docker Env') {
             steps {
                 bat '''
                 @echo off
                 for /f "tokens=*" %%i in ('minikube docker-env --shell cmd') do %%i
                 '''
             }
-        }
+        } */
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t addition:${IMAGE_TAG} .'
+                
+				bat '''
+				
+				docker build -t addition:%IMAGE_TAG% .
+				
+				'''
             }
+			}
 			
-			stage('stop container') {
+		stage('stop container') {
             steps { 
 			script {
 			try { 
@@ -47,23 +53,23 @@ pipeline {
 			   
             }
         }
-        }
+        
 
 		
 		stage('Dockerhub push ') {
-            steps {
+            
 			steps {
                 withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
-					docker tag pranatidasrk/addition:${IMAGE_TAG} addition:${IMAGE_TAG} 
+					docker tag pranatidasrk/addition:%IMAGE_TAG% addition:${IMAGE_TAG} 
                     docker login -u pranatidasrk -p $DOCKER_TOKEN https://hub.docker.com/repositories/pranatidasrk
-					docker push pranatidasrk/addition:${IMAGE_TAG}
+					docker push pranatidasrk/addition:%IMAGE_TAG%
 					docker logout
                     '''
                 }
             }
        
-            }
+            
         }
 
    /*    stage('Deploy to Minikube') {
