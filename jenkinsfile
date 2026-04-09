@@ -61,7 +61,7 @@ pipeline {
         stage('Deploy to Minikube using Helm') {
             steps {
                 bat '''
-                helm upgrade --install my-release helm-chat \
+                C:\Users\prana\AppData\Local\Microsoft\WinGet\Packages\Helm.Helm_Microsoft.Winget.Source_8wekyb3d8bbwe\windows-amd64\helm.exe upgrade --install my-release helm-chat \
                 --namespace namespace2 \
                 --create-namespace \
                 --set image.repository=pranatidasrk/addition \
