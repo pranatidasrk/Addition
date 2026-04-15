@@ -28,7 +28,7 @@ pipeline {
             }
         }
 			
-        stage('stop container') {
+        stage('Stop Old Container') {
             steps { 
                 script {
                     try { 
@@ -37,19 +37,17 @@ pipeline {
                         docker rm sangu
                         '''
                     } catch (err) {
-                        println("stage fail but continue")
+                        echo "Container not running, skipping..."
                     }
                 }
             }
         }
 
-        // ✅ FIXED DockerHub push
-        stage('Dockerhub push') {
+        stage('Push to DockerHub') {
             steps {
                 withCredentials([string(credentialsId: 'dockerhub_token', variable: 'DOCKER_TOKEN')]) {
                     bat '''
-                    docker tag %IMAGE_NAME%:%IMAGE_TAG% %IMAGE_NAME%:%IMAGE_TAG%
-                    docker login -u pranatidasrk -p %DOCKER_TOKEN%
+                    echo %DOCKER_TOKEN% | docker login -u pranatidasrk --password-stdin
                     docker push %IMAGE_NAME%:%IMAGE_TAG%
                     docker logout
                     '''
@@ -57,17 +55,18 @@ pipeline {
             }
         }
 
-        // ✅ NEW: Helm Deployment (replaces docker run)
         stage('Deploy to Minikube using Helm') {
             steps {
                 bat '''
-                helm upgrade --install my-release helm-chat --namespace namespace2 --create-namespace --set image.repository=pranatidasrk/addition --set image.tag=v1
+                helm upgrade --install %RELEASE_NAME% %CHART_PATH% ^
+                --namespace %NAMESPACE% --create-namespace ^
+                --set image.repository=%IMAGE_NAME% ^
+                --set image.tag=%IMAGE_TAG%
                 '''
             }
         }
 
-        // ✅ Verification
-        stage('Verify') {
+        stage('Verify Deployment') {
             steps {
                 bat '''
                 kubectl get pods -n %NAMESPACE%
